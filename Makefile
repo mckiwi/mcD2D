@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for mcD2D
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -O out -I.
+#  opp_makemake -f --deep -O out -KINET_PROJ=../inet -KSIMULTE_0_9_1_PROJ=../simulte-0.9.1 -DINET_IMPORT -I. -I$$\(INET_PROJ\)/src -I$$\(SIMULTE_0_9_1_PROJ\)/src -L$$\(INET_PROJ\)/src -L$$\(SIMULTE_0_9_1_PROJ\)/src -lINET$$\(D\) -llte$$\(D\)
 #
 
 # Name of target to be created (-o option)
@@ -16,13 +16,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(QTENV_LIBS) $(CMDENV_LI
 #USERIF_LIBS = $(QTENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I.
+INCLUDE_PATH = -I. -I$(INET_PROJ)/src -I$(SIMULTE_0_9_1_PROJ)/src
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS =
+LIBS = $(LDFLAG_LIBPATH)$(INET_PROJ)/src $(LDFLAG_LIBPATH)$(SIMULTE_0_9_1_PROJ)/src  -lINET$(D) -llte$(D)
 
 # Output directory
 PROJECT_OUTPUT_DIR = out
@@ -30,13 +30,18 @@ PROJECTRELATIVE_PATH =
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS =
+OBJS = $O/src/MyEnodeB.o $O/src/MyScheduler.o $O/src/MyUE.o $O/src/PositionHandler.o $O/src/MyMessage_m.o
 
 # Message files
-MSGFILES =
+MSGFILES = \
+    src/MyMessage.msg
 
 # SM files
 SMFILES =
+
+# Other makefile variables (-K)
+INET_PROJ=../inet
+SIMULTE_0_9_1_PROJ=../simulte-0.9.1
 
 #------------------------------------------------------------------------------
 
@@ -60,8 +65,11 @@ include $(CONFIGFILE)
 
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS = $(OPPMAIN_LIB) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
+ifneq ($(TOOLCHAIN_NAME),clangc2)
+LIBS += -Wl,-rpath,$(abspath $(INET_PROJ)/src) -Wl,-rpath,$(abspath $(SIMULTE_0_9_1_PROJ)/src)
+endif
 
-COPTS = $(CFLAGS) $(IMPORT_DEFINES)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
+COPTS = $(CFLAGS) $(IMPORT_DEFINES) -DINET_IMPORT $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 MSGCOPTS = $(INCLUDE_PATH)
 SMCOPTS =
 
